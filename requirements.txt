@@ -4,3 +4,5 @@ langchain-groq
 python-dotenv
 chromadb
 pypdf
+langchain-huggingface
+sentence-transformers
