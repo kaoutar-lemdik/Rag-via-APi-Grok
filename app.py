@@ -105,7 +105,7 @@ def page_accueil():
 
     if consentement:
         if st.button(
-            "🚀 Commencer",
+            " Commencer",
             type="primary",
             use_container_width=True
         ):
