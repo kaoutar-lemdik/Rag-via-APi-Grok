@@ -7,3 +7,5 @@ python-dotenv
 chromadb
 pypdf
 sentence-transformers
+gspread
+google-auth
