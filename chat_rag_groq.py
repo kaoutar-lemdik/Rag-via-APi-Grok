@@ -18,6 +18,13 @@ DB_DIR = os.path.join(BASE_DIR, "Chroma_db")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = "llama-3.1-8b-instant"
 
+if not GROQ_API_KEY:
+    if "GROQ_API_KEY" in st.secrets:
+        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+    else:
+        st.error("Erreur : GROQ_API_KEY introuvable dans les secrets Streamlit !")
+        st.stop()
+
 MAX_TOKENS = 500
 TEMPERATURE = 0.1
 TOP_K = 5
