@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import time
 from chat_rag_groq import TGRChatbot
@@ -6,10 +7,35 @@ from questionnaire import (
     verifier_reponses,
     sauvegarder_google_sheets
 )
+import ingestion_chroma  # Importe ton script d'ingestion
 
 # ============================================================
 #                    CONFIGURATION PAGE
 # ============================================================
+
+# --- CONFIGURATION DES CHEMINS ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.join(BASE_DIR, "Chroma_db")
+DATA_DIR = os.path.join(BASE_DIR, "Data_test")
+
+# --- INITIALISATION AUTOMATIQUE ---
+# Si le fichier de base de données n'existe pas ou si le dossier est vide
+if not os.path.exists(os.path.join(DB_DIR, "chroma.sqlite3")):
+    st.warning("⚠️ Base de connaissances introuvable. Initialisation en cours...")
+    
+    # On s'assure que le dossier Data_test existe et n'est pas vide
+    if os.path.exists(DATA_DIR) and len(os.listdir(DATA_DIR)) > 0:
+        with st.spinner("Analyse des documents TGR... Patientez quelques instants."):
+            try:
+                # Appelle la fonction principale de ton script d'ingestion
+                ingestion_chroma.main() 
+                st.success("✅ Intelligence TGR prête !")
+                st.rerun() # Relance l'app pour charger la nouvelle base
+            except Exception as e:
+                st.error(f"Erreur lors de l'ingestion : {e}")
+    else:
+        st.error("❌ Le dossier 'Data_test' est vide. Ajoutez des PDF sur GitHub !")
+        st.stop()
 
 st.set_page_config(
     page_title="Assistant TGR — Chatbot IA",
