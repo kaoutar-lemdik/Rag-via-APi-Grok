@@ -85,8 +85,8 @@ def page_accueil():
 
     | Étape | Quoi | Durée |
     |-------|------|-------|
-    | 1️⃣ | **Tester le chatbot** en posant quelques questions | ~5 min |
-    | 2️⃣ | **Donner votre avis** via un court questionnaire | ~5 min |
+    | 1️⃣ | **Tester le chatbot** en posant quelques questions | ~3 min |
+    | 2️⃣ | **Donner votre avis** via un court questionnaire | ~3 min |
 
     ---
 
@@ -342,7 +342,7 @@ def page_merci():
             st.session_state.nb_messages
         )
     with col2:
-        st.metric("⏱️ Durée estimée", "~10 min")
+        st.metric("⏱️ Durée estimée", "~6 min")
 
     st.markdown("---")
 
@@ -353,11 +353,11 @@ def page_merci():
     à collecter plus de réponses :
     """)
 
-    st.code("https://tgr-chatbot.streamlit.app", language=None)
+    st.code("https://rag-via-api-grok-3qs88yvxyufljb9zbhrndk.streamlit.app/", language=None)
 
     st.markdown("""
     ---
-    📧 Contact : **[ton.email@universite.ma]**
+    📧 Contact : **[kaoutar.lemdik@usms.ac.ma]**
     """)
 
 
