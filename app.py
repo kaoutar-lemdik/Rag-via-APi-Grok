@@ -29,7 +29,7 @@ if "chatbot_ready" not in st.session_state:
 MIN_ECHANGES = 3
 
 QUESTIONS_SUGGEREES = [
-    "Quels documents fournir pour obtenir une attestation fiscale ?",
+    "ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
     "Comment se faire rembourser des frais de mission ?",
     "Comment obtenir un certificat de paiement ?",
 ]
