@@ -7,13 +7,6 @@ from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
 from groq import Groq
 
-# ============================================================
-#                    MODE OFFLINE HUGGINGFACE
-# ============================================================
-os.environ["TRANSFORMERS_OFFLINE"] = "1"
-os.environ["HF_DATASETS_OFFLINE"] = "1"
-os.environ["HF_HUB_OFFLINE"] = "1"
-
 load_dotenv()
 
 # ============================================================
@@ -38,13 +31,12 @@ TOP_K        = 5
 
 @st.cache_resource
 def load_embeddings():
-    """Charge le modele d'embeddings UNE SEULE FOIS en mode offline."""
+    """Charge le modele d'embeddings UNE SEULE FOIS."""
     print("⏳ Chargement du modèle d'embedding...")
     emb = HuggingFaceEmbeddings(
         model_name="intfloat/multilingual-e5-base",
         model_kwargs={
-            'device': 'cpu',
-            'local_files_only': True
+            'device': 'cpu'
         },
         encode_kwargs={'normalize_embeddings': True}
     )
@@ -56,7 +48,6 @@ def load_embeddings():
 def load_database(_embeddings):
     """Connecte Pinecone UNE SEULE FOIS."""
 
-    # Clé depuis Streamlit Cloud ou .env local
     try:
         api_key = st.secrets["PINECONE_API_KEY"]
     except Exception:
