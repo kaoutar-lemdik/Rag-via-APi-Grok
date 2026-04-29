@@ -1,25 +1,8 @@
-.gitignore
-# Clés API - JAMAIS sur GitHub
 .env
-
-# Bases de données locales
 Chroma_db/
 __pycache__/
-
-# Scripts d'ingestion - locaux uniquement
 ingest_pinecone.py
 ingestion_chroma.py
-
-# Documents PDF/DOCX - trop lourds
 Data_test/
-
-# Fichiers Python compilés
 *.pyc
-*.pyo
-
-# Fichiers système
-.DS_Store
-desktop.ini
-
-# Logs locaux
 conversation_log.txt
