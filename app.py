@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Assistant TGR — Chatbot IA",
     page_icon="🏛️",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # ← Sidebar cachée par défaut sur mobile
 )
 
 # ============================================================
@@ -32,6 +32,7 @@ QUESTIONS_SUGGEREES = [
     "ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
     "Comment se faire rembourser des frais de mission ?",
     "Comment obtenir un certificat de paiement ?",
+    "Quels documents fournir pour obtenir une attestation fiscale ?",
 ]
 
 # ============================================================
@@ -49,6 +50,14 @@ st.markdown("""
     }
     div[data-testid="stSidebar"] {
         background-color: #f8f9fa;
+    }
+    /* Boutons questions suggérées */
+    .question-btn {
+        background-color: #f0f2f6;
+        border-radius: 10px;
+        padding: 8px;
+        margin: 4px 0;
+        font-size: 0.85rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -100,7 +109,7 @@ def page_accueil():
 
     if consentement:
         if st.button(
-            " Commencer",
+            "🚀 Commencer",
             type="primary",
             use_container_width=True
         ):
@@ -124,7 +133,7 @@ def page_chatbot():
                 st.error(f"❌ Erreur lors du chargement : {e}")
                 return
 
-    # ---- SIDEBAR ----
+    # ---- SIDEBAR (PC uniquement) ----
     with st.sidebar:
         st.markdown("## 📌 Guide")
 
@@ -140,8 +149,6 @@ def page_chatbot():
         else:
             st.success(f"✅ **{nb}** échanges réalisés !")
             st.progress(1.0)
-            st.markdown("Vous pouvez continuer ou passer au questionnaire.")
-
             if st.button(
                 "📋 Donner mon avis",
                 type="primary",
@@ -152,8 +159,7 @@ def page_chatbot():
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("### 💡 Essayez ces questions :")
-
+        st.markdown("### 💡 Questions suggérées :")
         for i, question in enumerate(QUESTIONS_SUGGEREES):
             if st.button(
                 f"📌 {question}",
@@ -164,13 +170,34 @@ def page_chatbot():
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("🏛️ **TGR** |  LLaMA 3 via Groq")
+        st.markdown("🏛️ **TGR** | 🤖 LLaMA 3 via Groq")
         st.markdown("🇫🇷 Français | 🇲🇦 Arabe")
 
     # ---- ZONE DE CHAT ----
     st.markdown("## 💬 Chatbot TGR")
 
-    # Message d'accueil
+    # Barre de progression visible sur MOBILE
+    nb = st.session_state.nb_messages
+    if nb < MIN_ECHANGES:
+        st.info(
+            f"💬 **{nb}/{MIN_ECHANGES}** échanges — "
+            f"Posez encore **{MIN_ECHANGES - nb}** question(s) "
+            f"pour accéder au questionnaire."
+        )
+    else:
+        st.success("✅ Vous pouvez maintenant donner votre avis !")
+        if st.button(
+            "📋 Donner mon avis maintenant",
+            type="primary",
+            use_container_width=True,
+            key="btn_top"
+        ):
+            st.session_state.etape = "questionnaire"
+            st.rerun()
+
+    st.markdown("---")
+
+    # Message d'accueil + Questions visibles sur MOBILE
     if len(st.session_state.messages) == 0:
         with st.chat_message("assistant", avatar="🏛️"):
             st.markdown("""
@@ -180,10 +207,44 @@ def page_chatbot():
             - 📋 Les services et procédures de la TGR
             - 💳 Les modalités de paiement en ligne
             - 📄 Les documents nécessaires pour vos démarches
-
-            **Posez votre question** ci-dessous ou cliquez sur 
-            une suggestion dans le menu à gauche ! 👈
             """)
+
+        # ← Questions suggérées VISIBLES sur mobile
+        st.markdown("### 💡 Essayez ces questions :")
+
+        if st.button(
+            "📌 ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
+            use_container_width=True,
+            key="mob_q1"
+        ):
+            st.session_state.pending_question = "ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟"
+            st.rerun()
+
+        if st.button(
+            "📌 Quels documents pour une attestation fiscale ?",
+            use_container_width=True,
+            key="mob_q2"
+        ):
+            st.session_state.pending_question = "Quels documents fournir pour obtenir une attestation fiscale ?"
+            st.rerun()
+
+        if st.button(
+            "📌 Comment se faire rembourser des frais de mission ?",
+            use_container_width=True,
+            key="mob_q3"
+        ):
+            st.session_state.pending_question = "Comment se faire rembourser des frais de mission ?"
+            st.rerun()
+
+        if st.button(
+            "📌 Comment obtenir un certificat de paiement ?",
+            use_container_width=True,
+            key="mob_q4"
+        ):
+            st.session_state.pending_question = "Comment obtenir un certificat de paiement ?"
+            st.rerun()
+
+        st.markdown("---")
 
     # Afficher l'historique
     for msg in st.session_state.messages:
@@ -210,7 +271,7 @@ def page_chatbot():
     if prompt := st.chat_input("Posez votre question ici..."):
         traiter_question(prompt)
 
-    # Bouton questionnaire en bas
+    # Bouton questionnaire en bas après MIN_ECHANGES
     if st.session_state.nb_messages >= MIN_ECHANGES:
         st.markdown("---")
         st.success(
@@ -236,7 +297,6 @@ def page_chatbot():
 def traiter_question(question):
     """Traite une question de l'utilisateur via Pinecone + Groq."""
 
-    # Afficher la question
     st.session_state.messages.append({
         "role": "user",
         "content": question
@@ -245,7 +305,6 @@ def traiter_question(question):
     with st.chat_message("user", avatar="🙋"):
         st.markdown(question)
 
-    # Générer la réponse
     with st.chat_message("assistant", avatar="🏛️"):
         with st.spinner("🔍 Recherche en cours..."):
             try:
@@ -265,7 +324,6 @@ def traiter_question(question):
 
         st.caption(f"⏱️ {result['time']:.1f}s")
 
-    # Sauvegarder dans l'historique
     st.session_state.messages.append({
         "role": "assistant",
         "content": result["answer"],
