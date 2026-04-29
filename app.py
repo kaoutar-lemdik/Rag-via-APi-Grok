@@ -7,7 +7,7 @@ from chat_rag_groq import get_rag_response, init_chatbot
 # ============================================================
 
 st.set_page_config(
-    page_title="Assistant TGR — Chatbot IA",
+    page_title="Assistant TGR  Chatbot IA",
     page_icon="🏛️",
     layout="centered",
     initial_sidebar_state="collapsed"  # ← Sidebar cachée par défaut sur mobile
@@ -26,7 +26,7 @@ if "nb_messages" not in st.session_state:
 if "chatbot_ready" not in st.session_state:
     st.session_state.chatbot_ready = False
 
-MIN_ECHANGES = 3
+MIN_ECHANGES = 1
 
 QUESTIONS_SUGGEREES = [
     "ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
@@ -71,7 +71,7 @@ def page_accueil():
 
     st.markdown("""
     <div class="main-header">
-        <h1>🏛️ Assistant Virtuel — TGR</h1>
+        <h1>🏛️ Assistant Virtuel  TGR</h1>
         <h3>Trésorerie Générale du Royaume du Maroc</h3>
     </div>
     """, unsafe_allow_html=True)
@@ -213,7 +213,7 @@ def page_chatbot():
         st.markdown("### 💡 Essayez ces questions :")
 
         if st.button(
-            "📌 ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
+            " ما هي الوثائق المطلوبة للحصول على شهادة ضريبية ؟",
             use_container_width=True,
             key="mob_q1"
         ):
@@ -221,7 +221,7 @@ def page_chatbot():
             st.rerun()
 
         if st.button(
-            "📌 Quels documents pour une attestation fiscale ?",
+            " Quels documents pour une attestation fiscale ?",
             use_container_width=True,
             key="mob_q2"
         ):
@@ -229,7 +229,7 @@ def page_chatbot():
             st.rerun()
 
         if st.button(
-            "📌 Comment se faire rembourser des frais de mission ?",
+            " Comment se faire rembourser des frais de mission ?",
             use_container_width=True,
             key="mob_q3"
         ):
@@ -237,7 +237,7 @@ def page_chatbot():
             st.rerun()
 
         if st.button(
-            "📌 Comment obtenir un certificat de paiement ?",
+            " Comment obtenir un certificat de paiement ?",
             use_container_width=True,
             key="mob_q4"
         ):
