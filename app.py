@@ -100,7 +100,7 @@ def page_accueil():
 
     if consentement:
         if st.button(
-            "🚀 Commencer",
+            " Commencer",
             type="primary",
             use_container_width=True
         ):
@@ -164,7 +164,7 @@ def page_chatbot():
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("🏛️ **TGR** | 🤖 LLaMA 3 via Groq")
+        st.markdown("🏛️ **TGR** |  LLaMA 3 via Groq")
         st.markdown("🇫🇷 Français | 🇲🇦 Arabe")
 
     # ---- ZONE DE CHAT ----
