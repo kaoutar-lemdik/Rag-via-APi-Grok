@@ -109,7 +109,7 @@ def page_accueil():
 
     if consentement:
         if st.button(
-            "🚀 Commencer",
+            " Commencer",
             type="primary",
             use_container_width=True
         ):
@@ -162,7 +162,7 @@ def page_chatbot():
         st.markdown("### 💡 Questions suggérées :")
         for i, question in enumerate(QUESTIONS_SUGGEREES):
             if st.button(
-                f"📌 {question}",
+                f" {question}",
                 key=f"suggestion_{i}",
                 use_container_width=True
             ):
@@ -170,17 +170,17 @@ def page_chatbot():
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("🏛️ **TGR** | 🤖 LLaMA 3 via Groq")
+        st.markdown("🏛️ **TGR** |  LLaMA 3 via Groq")
         st.markdown("🇫🇷 Français | 🇲🇦 Arabe")
 
     # ---- ZONE DE CHAT ----
-    st.markdown("## 💬 Chatbot TGR")
+    st.markdown("##  Chatbot TGR")
 
     # Barre de progression visible sur MOBILE
     nb = st.session_state.nb_messages
     if nb < MIN_ECHANGES:
         st.info(
-            f"💬 **{nb}/{MIN_ECHANGES}** échanges — "
+            f" **{nb}/{MIN_ECHANGES}** échanges — "
             f"Posez encore **{MIN_ECHANGES - nb}** question(s) "
             f"pour accéder au questionnaire."
         )
