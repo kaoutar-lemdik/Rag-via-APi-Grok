@@ -3,7 +3,7 @@ langchain
 langchain-community
 langchain-huggingface
 langchain-pinecone
-pinecone
+pinecone>=3.0.0
 groq
 sentence-transformers
 pypdf
