@@ -9,5 +9,5 @@ sentence-transformers
 pypdf
 docx2txt
 gspread
-oauth2client
+google-auth
 python-dotenv
