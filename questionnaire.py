@@ -3,12 +3,15 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 import csv
-import json
 import os
 
 # ============================================================
-#                    CONFIGURATION
+# CONFIGURATION
 # ============================================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CREDENTIALS_FILE = os.path.join(BASE_DIR, "google_credentials.json")
+SHEET_NAME = "Resultats_PFE_TGR"
 
 LIKERT_OPTIONS = {
     1: "Pas du tout d'accord",
@@ -19,7 +22,7 @@ LIKERT_OPTIONS = {
 }
 
 # ============================================================
-#                    PROFIL SOCIODÉMOGRAPHIQUE
+# PROFIL SOCIODÉMOGRAPHIQUE
 # ============================================================
 
 PROFIL_QUESTIONS = {
@@ -58,7 +61,7 @@ PROFIL_QUESTIONS = {
 }
 
 # ============================================================
-#                    ITEMS LIKERT
+# ITEMS LIKERT
 # ============================================================
 
 QUESTIONNAIRE_SECTIONS = {
@@ -110,14 +113,12 @@ QUESTIONNAIRE_SECTIONS = {
     }
 }
 
-
 # ============================================================
-#                    FONCTIONS D'AFFICHAGE
+# FONCTIONS D'AFFICHAGE
 # ============================================================
 
 def afficher_profil():
     """Affiche et collecte les questions sociodémographiques."""
-
     st.markdown("### 👤 Votre profil")
     st.markdown("*Quelques informations pour mieux connaître votre profil.*")
     st.markdown("---")
@@ -136,7 +137,6 @@ def afficher_profil():
 
 def afficher_likert(code, texte):
     """Affiche un item Likert avec des boutons radio horizontaux."""
-
     st.markdown(f"**{code}.** {texte}")
 
     reponse = st.radio(
@@ -149,13 +149,11 @@ def afficher_likert(code, texte):
     )
 
     st.markdown("---")
-
     return reponse
 
 
 def afficher_questionnaire():
     """Affiche le questionnaire complet et retourne toutes les réponses."""
-
     st.markdown("## 📋 Donnez-nous votre avis !")
 
     st.markdown("""
@@ -172,14 +170,12 @@ def afficher_questionnaire():
 
     toutes_reponses = {}
 
-    # ---- PARTIE 1 : PROFIL ----
     profil = afficher_profil()
     toutes_reponses.update(profil)
 
     st.markdown("---")
 
-    # ---- PARTIES 2 à 6 : ITEMS LIKERT ----
-    for section_key, section in QUESTIONNAIRE_SECTIONS.items():
+    for _, section in QUESTIONNAIRE_SECTIONS.items():
         st.markdown(f"### {section['titre']}")
         st.markdown(f"*{section['consigne']}*")
         st.markdown("---")
@@ -188,7 +184,6 @@ def afficher_questionnaire():
             reponse = afficher_likert(code, texte)
             toutes_reponses[code] = reponse
 
-    # ---- COMMENTAIRE LIBRE ----
     st.markdown("### 💬 Commentaire libre (facultatif)")
     commentaire = st.text_area(
         "Si vous souhaitez partager une remarque sur votre expérience :",
@@ -202,99 +197,110 @@ def afficher_questionnaire():
 
 
 # ============================================================
-#                    VÉRIFICATION DES RÉPONSES
+# VÉRIFICATION DES RÉPONSES
 # ============================================================
 
 def verifier_reponses(reponses):
     """Vérifie que toutes les réponses obligatoires sont remplies."""
-
     for key in PROFIL_QUESTIONS.keys():
         if reponses.get(key) == "— Sélectionnez —":
             return False, f"Veuillez remplir le champ : {PROFIL_QUESTIONS[key]['label']}"
-
     return True, ""
 
 
 # ============================================================
-#                    SAUVEGARDE — GOOGLE SHEETS
+# CONNEXION GOOGLE SHEETS
+# ============================================================
+
+def get_google_sheet():
+    """
+    Retourne la première feuille du Google Sheets.
+    Priorité : Streamlit Secrets → fichier local.
+    """
+    scope = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    try:
+        if "gcp_service_account" in st.secrets:
+            creds_dict = dict(st.secrets["gcp_service_account"])
+            creds = Credentials.from_service_account_info(
+                creds_dict,
+                scopes=scope
+            )
+            client = gspread.authorize(creds)
+            return client.open(SHEET_NAME).sheet1
+    except Exception as e:
+        st.error(f"Erreur Streamlit Secrets : {type(e).__name__} - {e}")
+
+    if os.path.exists(CREDENTIALS_FILE):
+        try:
+            creds = Credentials.from_service_account_file(
+                CREDENTIALS_FILE,
+                scopes=scope
+            )
+            client = gspread.authorize(creds)
+            return client.open(SHEET_NAME).sheet1
+        except Exception as e:
+            raise Exception(f"Erreur Google Sheets/local : {type(e).__name__} - {e}")
+
+    raise FileNotFoundError(f"Fichier credentials introuvable : {CREDENTIALS_FILE}")
+
+
+# ============================================================
+# SAUVEGARDE — GOOGLE SHEETS
 # ============================================================
 
 def sauvegarder_google_sheets(reponses):
     """
     Sauvegarde les réponses dans Google Sheets.
-    Si Google Sheets n'est pas configuré, sauvegarde en CSV local.
+    Si Google Sheets échoue, bascule sur CSV local.
     """
-
-    # Ajouter les métadonnées
-    reponses["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    reponses["nb_echanges"] = st.session_state.get("nb_messages", 0)
+    donnees = reponses.copy()
+    donnees["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    donnees["nb_echanges"] = st.session_state.get("nb_messages", 0)
 
     try:
-        scope = [
-            "https://spreadsheets.google.com/feeds",
-            "https://www.googleapis.com/auth/drive"
-        ]
+        sheet = get_google_sheet()
 
-        # Option 1 : Credentials depuis Streamlit Secrets (déploiement cloud)
-        if "gcp_service_account" in st.secrets:
-            creds_dict = dict(st.secrets["gcp_service_account"])
-            creds = Credentials.from_service_account_info(
-                creds_dict, scopes=scope
-            )
-        # Option 2 : Credentials depuis un fichier local (développement)
-        elif os.path.exists("google_credentials.json"):
-            creds = Credentials.from_service_account_file(
-                "google_credentials.json", scopes=scope
-            )
-        # Option 3 : Pas de credentials → sauvegarde CSV
+        premiere_ligne = sheet.row_values(1)
+
+        if not premiere_ligne:
+            sheet.insert_row(list(donnees.keys()), index=1)
+            prochaine_ligne = 2
         else:
-            return sauvegarder_csv(reponses)
+            prochaine_ligne = len(sheet.col_values(1)) + 1
 
-        # Connexion à Google Sheets
-        client = gspread.authorize(creds)
-        sheet = client.open("Resultats_PFE_TGR").sheet1
+        sheet.insert_row(list(donnees.values()), index=prochaine_ligne)
 
-        # Ajouter les en-têtes si la feuille est vide
-        existing = sheet.get_all_values()
-        if len(existing) == 0:
-            sheet.append_row(list(reponses.keys()))
-
-        # Ajouter la ligne de données
-        sheet.append_row(list(reponses.values()))
-
+        st.success(f"✅ Réponses enregistrées dans Google Sheets (ligne {prochaine_ligne}).")
         return True
 
     except Exception as e:
         st.warning(
-            f"⚠️ Google Sheets non disponible ({e}). "
+            f"⚠️ Google Sheets non disponible ({type(e).__name__} - {e}). "
             f"Sauvegarde locale en CSV activée."
         )
-        return sauvegarder_csv(reponses)
+        return sauvegarder_csv(donnees)
 
 
 # ============================================================
-#                    SAUVEGARDE — CSV LOCAL (BACKUP)
+# SAUVEGARDE — CSV LOCAL (BACKUP)
 # ============================================================
 
 def sauvegarder_csv(reponses):
-    """
-    Sauvegarde de secours en CSV local.
-    Utilisée quand Google Sheets n'est pas configuré.
-    """
-
-    fichier = "resultats_questionnaire.csv"
-
-    # Vérifier si le fichier existe déjà
-    fichier_existe = os.path.exists(fichier)
+    """Sauvegarde de secours en CSV local."""
+    fichier = os.path.join(BASE_DIR, "resultats_questionnaire.csv")
+    fichier_exist = os.path.exists(fichier)
 
     with open(fichier, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=reponses.keys())
 
-        # Écrire les en-têtes si c'est un nouveau fichier
-        if not fichier_existe:
+        if not fichier_exist:
             writer.writeheader()
 
-        # Écrire la ligne de données
         writer.writerow(reponses)
 
+    st.success("✅ Réponses enregistrées en local dans resultats_questionnaire.csv")
     return True
