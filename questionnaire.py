@@ -66,18 +66,18 @@ PROFIL_QUESTIONS = {
 
 QUESTIONNAIRE_SECTIONS = {
     "qualite_percue": {
-        "titre": "📊 Qualité perçue des réponses du chatbot",
+        "titre": " Qualité perçue des réponses du chatbot",
         "consigne": "Évaluez la qualité des réponses que vous avez reçues du chatbot.",
         "items": {
             "QP1": "Les réponses fournies par le chatbot étaient pertinentes par rapport à mes questions.",
-            "QP3": "Les informations fournies me semblaient correctes et fiables.",
-            "QP5": "Les réponses étaient suffisamment détaillées et complètes.",
-            "QP6": "Le langage utilisé par le chatbot était clair et compréhensible.",
-            "QP7": "Le chatbot a répondu rapidement à mes questions."
+            "QP2": "Les informations fournies me semblaient correctes et fiables.",
+            "QP3": "Les réponses étaient suffisamment détaillées et complètes.",
+            "QP4": "Le langage utilisé par le chatbot était clair et compréhensible.",
+            "QP5": "Le chatbot a répondu rapidement à mes questions."
         }
     },
     "satisfaction": {
-        "titre": "😊 Satisfaction globale",
+        "titre": " Satisfaction globale",
         "consigne": "Évaluez votre niveau de satisfaction suite à votre interaction.",
         "items": {
             "SAT1": "Je suis globalement satisfait(e) de mon interaction avec le chatbot.",
@@ -86,16 +86,16 @@ QUESTIONNAIRE_SECTIONS = {
         }
     },
     "confiance": {
-        "titre": "🏛️ Confiance institutionnelle envers la TGR",
+        "titre": " Confiance institutionnelle envers la TGR",
         "consigne": "Évaluez votre perception de la TGR après cette interaction.",
         "items": {
             "CI1": "Après cette interaction, je perçois la TGR comme une institution compétente.",
-            "CI3": "Je fais confiance à la TGR pour fournir des informations fiables et exactes.",
-            "CI5": "J'ai le sentiment que la TGR se soucie véritablement des besoins de ses usagers."
+            "CI2": "Je fais confiance à la TGR pour fournir des informations fiables et exactes.",
+            "CI3": "J'ai le sentiment que la TGR se soucie véritablement des besoins de ses usagers."
         }
     },
     "utilite_percue": {
-        "titre": "💡 Utilité perçue de l'IA",
+        "titre": " Utilité perçue de l'IA",
         "consigne": "Évaluez votre perception de l'utilité de l'IA dans le service public.",
         "items": {
             "UP1": "L'utilisation d'un chatbot IA est utile pour obtenir des informations sur les services publics.",
@@ -104,7 +104,7 @@ QUESTIONNAIRE_SECTIONS = {
         }
     },
     "facilite_percue": {
-        "titre": "🖱️ Facilité d'utilisation",
+        "titre": " Facilité d'utilisation",
         "consigne": "Évaluez la facilité d'utilisation du chatbot.",
         "items": {
             "FU1": "L'interaction avec le chatbot était facile et intuitive.",
@@ -119,7 +119,7 @@ QUESTIONNAIRE_SECTIONS = {
 
 def afficher_profil():
     """Affiche et collecte les questions sociodémographiques."""
-    st.markdown("### 👤 Votre profil")
+    st.markdown("### Votre profil")
     st.markdown("*Quelques informations pour mieux connaître votre profil.*")
     st.markdown("---")
 
@@ -154,16 +154,16 @@ def afficher_likert(code, texte):
 
 def afficher_questionnaire():
     """Affiche le questionnaire complet et retourne toutes les réponses."""
-    st.markdown("## 📋 Donnez-nous votre avis !")
+    st.markdown("##  Donnez-nous votre avis !")
 
     st.markdown("""
-    Merci d'avoir testé le chatbot ! 🙏
+    Merci d'avoir testé le chatbot ! 
     
     Répondez aux questions suivantes pour nous aider à évaluer 
     cette expérience. **Il n'y a pas de bonne ou de mauvaise réponse.**
     Seule votre perception compte.
     
-    ⏱️ Durée : **4-5 minutes**
+     Durée : **4-5 minutes**
     """)
 
     st.markdown("---")
@@ -184,7 +184,7 @@ def afficher_questionnaire():
             reponse = afficher_likert(code, texte)
             toutes_reponses[code] = reponse
 
-    st.markdown("### 💬 Commentaire libre (facultatif)")
+    st.markdown("###  Commentaire libre (facultatif)")
     commentaire = st.text_area(
         "Si vous souhaitez partager une remarque sur votre expérience :",
         key="commentaire_libre",
@@ -274,12 +274,12 @@ def sauvegarder_google_sheets(reponses):
 
         sheet.insert_row(list(donnees.values()), index=prochaine_ligne)
 
-        st.success(f"✅ Réponses enregistrées dans Google Sheets (ligne {prochaine_ligne}).")
+        st.success(f" Réponses enregistrées dans Google Sheets (ligne {prochaine_ligne}).")
         return True
 
     except Exception as e:
         st.warning(
-            f"⚠️ Google Sheets non disponible ({type(e).__name__} - {e}). "
+            f" Google Sheets non disponible ({type(e).__name__} - {e}). "
             f"Sauvegarde locale en CSV activée."
         )
         return sauvegarder_csv(donnees)
@@ -302,5 +302,5 @@ def sauvegarder_csv(reponses):
 
         writer.writerow(reponses)
 
-    st.success("✅ Réponses enregistrées en local dans resultats_questionnaire.csv")
+    st.success(" Réponses enregistrées en local dans resultats_questionnaire.csv")
     return True
